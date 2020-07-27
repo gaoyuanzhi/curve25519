@@ -14,9 +14,9 @@ def modp_inv( x ):
     return pow(x, p-2, p)
 
 def sha512_digest( s ):
-    return sha512(s).digest()
+    return sha512( s ).digest()
 
-def sha512_modq(s):
+def sha512_modL(s):
     return int.from_bytes(sha512_digest(s), "little") % L
 
 def recover_x(y, sign):
@@ -59,6 +59,8 @@ def int_to_point(s):
     else:
         return (x, y, 1, x*y % p)
 
+def from_le(s): return int.from_bytes(s, byteorder="little")
+
 def s_prefix_secret( secret ):
     h = sha512_digest(secret)
     s = int.from_bytes(h[:32], "little")
@@ -73,9 +75,9 @@ def generate_public_key( secret ):
 def sign( secret, msg ):
     s, prefix = s_prefix_secret(secret)
     A = generate_public_key( secret )
-    r = sha512_modq( prefix + msg )
+    r = sha512_modL( prefix + msg )
     R = point_to_int( pointMul(r, G) )
-    k = sha512_modq( R + A + msg)
+    k = sha512_modL( R + A + msg)
     S = int.to_bytes( (r + k * s) % L, 32, "little" )
     return R + S
 
@@ -94,7 +96,7 @@ def verify( public, msg, signature ):
     S = int.from_bytes(signature[32:], "little")
     if S >= L:
     	return False
-    k = sha512_modq(Ri + public + msg)
+    k = sha512_modL(Ri + public + msg)
     sB = pointMul(S, G)
     kA = pointMul(k, A)
     return pointEqual(sB, pointAdd(R, kA))

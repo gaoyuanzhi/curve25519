@@ -59,8 +59,6 @@ def int_to_point(s):
     else:
         return (x, y, 1, x*y % p)
 
-def from_le(s): return int.from_bytes(s, byteorder="little")
-
 def s_prefix_secret( secret ):
     h = sha512_digest(secret)
     s = int.from_bytes(h[:32], "little")
